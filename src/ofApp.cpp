@@ -7,7 +7,7 @@ void ofApp::setup(){
     
     //ringButton.addListener(this,&ofApp::ringButtonPressed);
     buttonState = "digital pin:";
-    potValue = "analog pin:";
+   // potValue = "analog pin:";
     
     //gui.setup("panel"); // most of the time you don't need a name but don't forget to call setup
     //gui.add(ringButton.setup("ring"));
@@ -35,39 +35,37 @@ void ofApp::setup(){
     }
     
     bPressState = 0;
-    
     int numNotes = xml.getNumChildren() ;
     if ( numNotes > 0 )
     {
-        
-        //for ( int i  = numNotes.size()-1 ; i > 0  ; i-- )
-        for ( int i  = 0; i < numNotes  ; i++ )
+        for (int j = 0; j < 5; j++)
         {
-            DateTime dt ;
-            string branch = "note[" + ofToString( i ) + "]" ;
-             dt.hour =  xml.getValue<int>(branch+"hours") ;
-             dt.minute =  xml.getValue<int>(branch+"minutes") ;
-             dt.second =  xml.getValue<int>(branch+"seconds") ;
-             dt.value = xml.getValue<int>(branch+"value") ;
+            vector <DateTime> noteSeq;
+            notes.push_back(noteSeq);
             
-            
-            int totalSeconds = 0 ;
-            totalSeconds = dt.hour * 60 * 60 ;
-            totalSeconds += dt.minute * 60 ;
-            totalSeconds += dt.second ;
-            
-            
-            for (int j = 0; j < 5; j++)
+            //for ( int i  = numNotes.size()-1 ; i > 0  ; i-- )
+            for ( int i  = 0; i < numNotes  ; i++ )
             {
-                notes[j].push_back( dt ) ;
+                DateTime dt ;
+                string branch = "note[" + ofToString( i ) + "]" ;
+                dt.hour =  xml.getValue<int>(branch+"hours") ;
+                dt.minute =  xml.getValue<int>(branch+"minutes") ;
+                dt.second =  xml.getValue<int>(branch+"seconds") ;
+                dt.value = xml.getValue<int>(branch+"value") ;
+                
+                
+                int totalSeconds = 0 ;
+                totalSeconds = dt.hour * 60 * 60 ;
+                totalSeconds += dt.minute * 60 ;
+                totalSeconds += dt.second ;
+                
+                notes.at(j).push_back( dt );
                 //int selectedIndex = ofMap( totalSeconds , 0 , secondsInDay , 0 , numFrames, true ) ;
                 //frames[ selectedIndex ] = true ;
                 
                 ofLogNotice() << " note [ " << i << " ] is : " << dt.toString() << " selected Index is :" << 0 ;  ;
             }
         }
-        
-        
     }
     else
     {
@@ -126,6 +124,8 @@ void ofApp::update(){
      
      ring.play();
      }*/
+    
+    ofLogNotice() << "seat num: " << seatNum;
     
     if (seatNum < 6) {
         seatNum++;
@@ -214,7 +214,7 @@ void ofApp::pinPressed(const int & pinNum) {
     
     if(ard.getDigital(pinNum))
     {
-        ofLogNotice() << "digital pin " << ard.getDigital(pinNum);
+        ofLogNotice() << "digital pin " << pinNum;
         
         bNoteAdded = false ;
         
@@ -225,7 +225,7 @@ void ofApp::pinPressed(const int & pinNum) {
         if ( (lastTime + duration) < ofGetSystemTime() )
         {
             ofLogNotice() << "current time" << ofGetSystemTime();
-            ofLogNotice() << "last time" << lastTime;
+            ofLogNotice() << "array loction " << arrayLocation;
             //ofLogNotice() << "current note " << currentNote;
             
             DateTime dt = notes[arrayLocation][ currentNote[arrayLocation] ] ; //NOTES REFERENCE
@@ -257,8 +257,23 @@ void ofApp::pinPressed(const int & pinNum) {
             {
                 currentNote[arrayLocation] = 0 ;
             }
-            duration = 1000 ;
-            lastTime = ofGetSystemTime() ;
+            
+            seatsOccupied = 0;
+            for (int k = 0; k < 5; k++)
+            {
+                if (ard.getDigital(k + 2))
+                {
+                    seatsOccupied++;
+                }
+            }
+            if (seatsOccupied > 0)
+            {
+                duration = 1000 / seatsOccupied ;
+            } else
+            {
+                duration = 1000;
+            }
+                lastTime = ofGetSystemTime() ;
         }
         
         
@@ -303,7 +318,7 @@ void ofApp::digitalPinChanged(const int & pinNum) {
         if (durLength > 4000 && durLength < 5000){
             note = 3 ;
         }
-        if (durLength > 5000 && durLength < 6000){
+        if (durLength > 5000){
             note = 4 ;
         }
 
@@ -362,13 +377,13 @@ void ofApp::digitalPinChanged(const int & pinNum) {
                         ring.setSpeed( 1.25 ) ;
                         break ;
                 }
-                ring.play() ;
+                //ring.play() ;
                 currentNote[arrayLocation]-- ;
                 if ( currentNote[arrayLocation] < 0 )
                 {
                     currentNote[arrayLocation] = 0 ;
                 }
-                duration = 5000 ;
+                //duration = 5000 ;
                 //lastTime = ofGetSystemTime() ;
                 
             }
@@ -384,7 +399,7 @@ void ofApp::digitalPinChanged(const int & pinNum) {
 void ofApp::analogPinChanged(const int & pinNum) {
     // do something with the analog input. here we're simply going to print the pin number and
     // value to the screen each time it changes
-    potValue = "analog pin: " + ofToString(pinNum) + " = " + ofToString(ard.getAnalog(pinNum));
+   // potValue = "analog pin: " + ofToString(pinNum) + " = " + ofToString(ard.getAnalog(pinNum));
 }
 
 

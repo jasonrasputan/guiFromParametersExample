@@ -71,6 +71,7 @@ public:
     
     int seatNum;
     int arrayLocation;
+    int seatsOccupied;
     
 private:
     
